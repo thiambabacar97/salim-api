@@ -1,31 +1,24 @@
 const { getAll, deleteUser, updateUser, findUserById, create } = require('../models/User');
 class UserController {
-    static create(req, res) {
-        const user = {
-            first_name: req.body.first_name,
-            last_name: req.body.last_name,
-            address: req.body.address,
-            age: req.body.age,
-        }
-        create(user)
-            .then(result => {
-                return res.status(401).json({
-                    result: {
-                        success: true,
-                        data: result,
-                        message: 'data created successfuly'
-                    }
-                });
-            })
-            .catch(error => {
-                return res.status(500).json({
-                    error: {
-                        success: false,
-                        message: "Internal servral",
-                        error: error
-                    }
-                });
+    static async create(req, res) {
+        const { first_name, last_name, address, age } = req.body;
+        const user = { first_name, last_name, address, age }
+        try {
+            const userCreate = await create(user);
+            const usr = await findUserById(userCreate.insertId);
+            return res.status(401).json({
+                success: true,
+                data: usr,
+                message: 'data created successfuly'
             });
+        } catch (error) {
+            return res.status(500).json({
+                error: {
+                    success: false,
+                    message: 'Internal serve error',
+                }
+            });
+        }
     }
     static users(req, res) {
         getAll()
